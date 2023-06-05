@@ -75,5 +75,13 @@ map.on('click', (e) => {
   const features = map.queryRenderedFeatures(e.point, {
       layers: ['excavation'],
   });
+  if(features.length ===0) return;
   console.log(features);
+  const feature = features[0];
+  const popup = new maplibregl.Popup()
+    .setLngLat(feature.geometry.coordinates)
+    .setHTML(`<div>${feature.properties['内容']}</div>
+    <div>${feature.properties['場所']}</div>`
+    )
+    .addTo(map)
 });
