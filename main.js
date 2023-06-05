@@ -36,7 +36,7 @@ const map = new maplibregl.Map({
 map.on('click', (e) => {
     // クリックした位置にある地物を取得
     const features = map.queryRenderedFeatures(e.point, {
-        layers: ['excavation-'],
+        layers: ['excavation'],
     });
     console.log(features);
 });
