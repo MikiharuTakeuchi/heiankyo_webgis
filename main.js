@@ -28,6 +28,10 @@ const map = new maplibregl.Map({
           plan: {
             type:'geojson',
             data: '/cyukain_east_survey18.geojson',
+          },
+          heianarea: {
+            type:'geojson',
+            data: '/heiankyo_area.geojson',
           }
       },
       layers: [
@@ -37,6 +41,11 @@ const map = new maplibregl.Map({
               source: 'osm',
               type: 'raster',
           },
+          {
+              id: 'heianarea-layer',
+              source: 'heianarea',
+              type: 'line'
+          },          
           {
               id: 'point-layer',
               source: 'excavation',
@@ -56,7 +65,7 @@ const map = new maplibregl.Map({
             id: 'plan-layer',
             source: 'plan',
             type: 'line'
-          }
+          },
       ]
     }
 })         
