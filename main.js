@@ -2,22 +2,13 @@
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-// OpacityControlプラグインの読み込み
-import OpacityControl from 'maplibre-gl-opacity';
-import 'maplibre-gl-opacity/dist/maplibre-gl-opacity.css';
-
-// 地点間の距離を計算するモジュール
-import distance from '@turf/distance';
-
-// 地理院標高タイルをMapLibre GL JSで利用するためのモジュール
-import { useGsiTerrainSource } from 'maplibre-gl-gsi-terrain';
 
 const map = new maplibregl.Map({
   container: 'map', // div要素のid
-  zoom: 5, // 初期表示のズーム
-  center: [138, 37], // 初期表示の中心
-  minZoom: 5, // 最小ズーム
-  maxZoom: 18, // 最大ズーム
+  zoom: 8, // 初期表示のズーム
+  center: [132, 34], // 初期表示の中心
+  minZoom: 4, // 最小ズーム
+  maxZoom: 11, // 最大ズーム
   maxBounds: [122, 20, 154, 50], // 表示可能な範囲
   style: {
       version: 8,
