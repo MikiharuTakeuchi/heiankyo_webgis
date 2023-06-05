@@ -1,24 +1,44 @@
-import './style.css'
-import javascriptLogo from './javascript.svg'
-import viteLogo from '/vite.svg'
-import { setupCounter } from './counter.js'
+// MapLibre GL JSの読み込み
+import maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
 
-document.querySelector('#app').innerHTML = `
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-      <img src="${javascriptLogo}" class="logo vanilla" alt="JavaScript logo" />
-    </a>
-    <h1>Hello Vite!</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite logo to learn more
-    </p>
-  </div>
-`
+// OpacityControlプラグインの読み込み
+import OpacityControl from 'maplibre-gl-opacity';
+import 'maplibre-gl-opacity/dist/maplibre-gl-opacity.css';
 
-setupCounter(document.querySelector('#counter'))
+// 地点間の距離を計算するモジュール
+import distance from '@turf/distance';
+
+// 地理院標高タイルをMapLibre GL JSで利用するためのモジュール
+import { useGsiTerrainSource } from 'maplibre-gl-gsi-terrain';
+
+const map = new maplibregl.Map({
+  container: 'map', // div要素のid
+  zoom: 5, // 初期表示のズーム
+  center: [138, 37], // 初期表示の中心
+  minZoom: 5, // 最小ズーム
+  maxZoom: 18, // 最大ズーム
+  maxBounds: [122, 20, 154, 50], // 表示可能な範囲
+  style: {
+      version: 8,
+      sources: {
+          // 背景地図ソース
+          osm: {
+              type: 'raster',
+              tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+              maxzoom: 19,
+              tileSize: 256,
+              attribution:
+                  '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          },
+      },
+      layers: [
+          // 背景地図レイヤー
+          {
+              id: 'osm-layer',
+              source: 'osm',
+              type: 'raster',
+          },
+      ]
+    }
+})         
