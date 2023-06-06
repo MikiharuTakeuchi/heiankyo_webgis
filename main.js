@@ -5,6 +5,9 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import noUiSlider from "nouislider";
 import "nouislider/dist/nouislider.css";
 
+import OpacityControl from "maplibre-gl-opacity";
+import "maplibre-gl-opacity/dist/maplibre-gl-opacity.css";
+
 //発掘年度スライダーを初期化,idで探しに行く
 const sliderDiv = document.getElementById("slider");
 const minYear = 1890;
@@ -195,6 +198,16 @@ function updateExcavationFilter() {
 }
 
 map.on("load", () => {
+  const opacity = new OpacityControl({
+    overLayers: {
+      "heianarea-layer": "平安京条坊",
+      excavation: "発掘調査地点",
+      "excavation-heat": "発掘調査地点ヒートマップ",
+      "plan-layer": "調査図面",
+    },
+  });
+  map.addControl(opacity, "top-left");
+
   map.on("click", (e) => {
     // クリックした位置にある地物を取得
     const features = map.queryRenderedFeatures(e.point, {
