@@ -5,7 +5,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 const map = new maplibregl.Map({
   container: 'map', // div要素のid
   zoom: 8, // 初期表示のズーム
-  center: [132, 34], // 初期表示の中心
+  center: [136, 35], // 初期表示の中心
   minZoom: 4, // 最小ズーム
   maxZoom: 20, // 最大ズーム
   maxBounds: [122, 20, 154, 50], // 表示可能な範囲
@@ -84,4 +84,23 @@ map.on('click', (e) => {
     <div>${feature.properties['場所']}</div>`
     )
     .addTo(map)
+});
+
+
+//地図上でマウスが移動した際のイベント
+map.on('mousemove', (e) => {
+  //マウスカーソル以下にレイヤーが存在するかどうかをチェック
+const features = map.queryRenderedFeatures(e.point, {
+  layers: [
+    'excavation'
+  ],
+});
+//console.log(features)
+if(features.length >0){
+  //地物が存在する場合はカーソルをpointerに変更
+  map.getCanvas().style.cursor = 'pointer';
+} else {
+  //存在しない場合はデフォルト
+map.getCanvas().style.cursor = '';
+}
 });
