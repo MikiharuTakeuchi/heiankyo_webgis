@@ -6,7 +6,16 @@
         <title>平安京WebGIS</title>
     </head>
     <body style="margin: 0">
-        <div id="map" style="height: 100vh"></div>
+        <div id="map" style="height: 80vh"></div>
+        <!-- 発掘年度スライダー -->
+        <div
+            id="sliderContainer"
+            style="display: flex; padding: 8px; align-items: center"
+        >
+            <div style="width: 10%">開始年</div>
+            <div id="slider" style="width: 100%"></div>
+            <div style="width: 10%; text-align: right">終了年</div>
+        </div>
         <script type="module" src="/main.js"></script>
     </body>
 </html>
