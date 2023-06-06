@@ -2,9 +2,6 @@
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-import noUiSlider from 'nouislider';
-import 'nouislider/dist/nouislider.css';
-
 const map = new maplibregl.Map({
     container: 'map', // div要素のid
     zoom: 8, // 初期表示のズーム
@@ -80,13 +77,49 @@ map.on('click', (e) => {
     });
     if (features.length === 0) return;
     console.log(features);
-    const feature = features[0];
+
+    //ポップアップのところにスクロール機能をつける
+    let popupHtml = `<div style="max-height:400px; overflow-y: scroll;">`;
+    //ポップアップで表示させるものを5つにする（その準備）
+    const MAX_ITEMS = 5;
+
+    //ポップアップするときに事物が複数あるときの処理
+    features.forEach((feature, idx) => {
+        if (idx + 1 > MAX_ITEMS) return;
+        console.log(feature.properties['内容']);
+        //ポップアップのスタイル
+        popupHtml += `<div style="margin:4px 0; padding:2px; background-color:#00000000;">`;
+        // 各地物の情報をHTMLに追加する
+        popupHtml += `<div>${feature.properties['内容']}</div>
+    <div>${feature.properties['場所']}</div>`;
+        if (feature.properties['公開PDF_'] !== undefined) {
+            // ＵＲＬがある場合はaタグを追加する
+            popupHtml += `<a href='${feature.properties['公開PDF_']}'>報告書link</a>`;
+        } else {
+            popupHtml += `報告書PDFなし`;
+        }
+        //ポップアップの中で事物と事物の間に横線を入れる
+        popupHtml += `<hr/>`;
+        popupHtml += `</div>`;
+    });
+
+    /**
+  //constは変更のきかない変数を宣言
+  //letはその逆、変更ができる
+  let popupHtml = `<div>${feature.properties["内容"]}</div>
+  <div>${feature.properties["場所"]}</div>`;
+  if (feature.properties["公開PDF_"] !== undefined) {
+    // ＵＲＬがある場合はaタグを追加する
+    popupHtml += `<a href='${feature.properties["公開PDF_"]}'>報告書link</a>`;
+  } else {
+    popupHtml += `no pdf`;
+  }
+   */
+
+    popupHtml += '</div>';
     const popup = new maplibregl.Popup()
-        .setLngLat(feature.geometry.coordinates)
-        .setHTML(
-            `<div>${feature.properties['内容']}</div>
-    <div>${feature.properties['場所']}</div>`,
-        )
+        .setLngLat(e.lngLat)
+        .setHTML(popupHtml)
         .addTo(map);
 });
 
