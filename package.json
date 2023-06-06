@@ -12,6 +12,7 @@
     "vite": "^4.3.9"
   },
   "dependencies": {
-    "maplibre-gl": "^2.4.0"
+    "maplibre-gl": "^2.4.0",
+    "nouislider": "^15.7.0"
   }
 }
