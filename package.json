@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "maplibre-gl": "^2.4.0",
+    "maplibre-gl-opacity": "^1.4.0",
     "nouislider": "^15.7.0"
   }
 }
