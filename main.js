@@ -2,6 +2,9 @@
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
+import noUiSlider from 'nouislider';
+import 'nouislider/dist/nouislider.css';
+
 const map = new maplibregl.Map({
     container: 'map', // div要素のid
     zoom: 8, // 初期表示のズーム
