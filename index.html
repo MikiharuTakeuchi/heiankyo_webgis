@@ -6,24 +6,30 @@
         <title>平安京WebGIS</title>
     </head>
     <body style="margin: 0">
-        <div id="map" style="height: 80vh"></div>
+        <div style="position:relative; height:100vh; width:100%;">
+            <div id="map" style="height: 100vh; width:100%; position: absolute; top:0px; left:0px;"></div>
+        <div class="card" style="position: absolute; top:10px; right:5px; padding:8px 30px;">平安京発掘WebGIS</div>
         <!-- 発掘年度スライダー -->
-        <div
-            id="sliderContainer"
-            style="display: flex; padding: 8px; align-items: center"
-        >
-            <div style="width: 10%">調査年（古い）</div>
-            <div id="slider" style="width: 100%"></div>
-            <div style="width: 10%; text-align: right">新しい</div>
-        </div>
-                <!-- 時代スライダー -->
+        <!-- bottomとleftでdiv要素の配置場所を指定 -->
+        <div class="card" style="position: absolute; bottom:20px; left:10px; width:calc(100% - 20px);">
                 <div
-                id="sliderContainer"
-                style="margin:50px 0;display: flex; padding: 8px; align-items: center"
-            >
-                <div style="width: 10%">遺構時代（古い）</div>
-                <div id="age-slider" style="width: 100%"></div>
-                <div style="width: 10%; text-align: right">新しい</div>
+                    id="sliderContainer"
+                    style=" display: flex; padding: 8px; align-items: center"
+                >
+                    <div style="width: 20%">調査年（古い）</div>
+                    <div id="slider" style="width: 70%"></div>
+                    <div style="width: 10%; text-align: right">新しい</div>
+                </div>
+                        <!-- 時代スライダー -->
+                        <div
+                        id="sliderContainer"
+                        style="margin:50px 0;display: flex; padding: 8px; align-items: center"
+                    >
+                        <div style="width: 20%">遺構時代（古い）</div>
+                        <div id="age-slider" style="width: 70%"></div>
+                        <div style="width: 10%; text-align: right">新しい</div>
+                    </div>
+                </div>
             </div>
         <script type="module" src="/main.js"></script>
     </body>
