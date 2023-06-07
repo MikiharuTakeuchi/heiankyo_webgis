@@ -91,8 +91,8 @@ const ageSlider = noUiSlider.create(ageSliderDiv, {
 //地図画面を初期化
 const map = new maplibregl.Map({
   container: "map", // div要素のid
-  zoom: 8, // 初期表示のズーム
-  center: [136, 35], // 初期表示の中心
+  zoom: 12, // 初期表示のズーム
+  center: [135.73, 35], // 初期表示の中心
   minZoom: 4, // 最小ズーム
   maxZoom: 20, // 最大ズーム
   maxBounds: [122, 20, 154, 50], // 表示可能な範囲
@@ -107,6 +107,26 @@ const map = new maplibregl.Map({
         tileSize: 256,
         attribution:
           '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      },
+      gsiphoto: {
+        type: "raster",
+        tiles: [
+          "https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg",
+        ],
+        maxZoom: 18,
+        tileSize: 256,
+      },
+      gsigazo1: {
+        type: "raster",
+        tiles: ["https://cyberjapandata.gsi.go.jp/xyz/gazo1/{z}/{x}/{y}.jpg"],
+        maxzoom: 17,
+        tileSize: 256,
+      },
+      elevation: {
+        type: "raster",
+        tiles: ["https://cyberjapandata.gsi.go.jp/xyz/relief/{z}/{x}/{y}.png"],
+        maxzoom: 15,
+        tileSize: 256,
       },
       excavation: {
         type: "geojson",
@@ -126,6 +146,21 @@ const map = new maplibregl.Map({
       {
         id: "osm-layer",
         source: "osm",
+        type: "raster",
+      },
+      {
+        id: "gsi-photo-layer",
+        source: "gsiphoto",
+        type: "raster",
+      },
+      {
+        id: "gsi-gazo1-layer",
+        source: "gsigazo1",
+        type: "raster",
+      },
+      {
+        id: "gsi-elevation-layer",
+        source: "elevation",
         type: "raster",
       },
       {
@@ -149,9 +184,20 @@ const map = new maplibregl.Map({
         source: "excavation",
         type: "circle",
         paint: {
-          "circle-color": "#0000ff",
+          "circle-color": [
+            "case",
+            ["==", ["get", "a調査機"], "企業"],
+            "red",
+            ["==", ["get", "a調査機"], "京都市埋蔵文化財研究所"],
+            "green",
+            ["==", ["get", "a調査機"], "古代学協会"],
+            "blue",
+            ["==", ["get", "a調査機"], "京都府埋蔵文化財調査研究センター"],
+            "grey",
+            "yellow",
+          ],
           "circle-stroke-color": "#fff",
-          "circle-stroke-width": 2,
+          "circle-stroke-width": 1,
         },
         filter: [
           "all",
@@ -199,6 +245,14 @@ function updateExcavationFilter() {
 
 map.on("load", () => {
   const opacity = new OpacityControl({
+    //背景地図の切り替え機能、baseLayerにすることで複数のなかで一つを選択して表示する機能
+    baseLayers: {
+      "osm-layer": "OpenStreetMap",
+      "gsi-photo-layer": "地理院地図 全国最新写真（シームレス）",
+      "gsi-gazo1-layer": "地理院地図 1974年-1978年写真",
+      "gsi-elevation-layer": "地理院地図 色別標高図",
+    },
+    //メインのGISデータの表示非表示、overLayerにすることで複数のレイヤーのなかで複数選択して表示する機能
     overLayers: {
       "heianarea-layer": "平安京条坊",
       excavation: "発掘調査地点",
@@ -219,7 +273,7 @@ map.on("load", () => {
     //ポップアップのところにスクロール機能をつける
     let popupHtml = `<div style="max-height:400px; overflow-y: scroll;">`;
     //ポップアップで表示させるものを5つにする（その準備）
-    const MAX_ITEMS = 5;
+    const MAX_ITEMS = 8;
 
     //ポップアップするときに事物が複数あるときの処理
     features.forEach((feature, idx) => {
