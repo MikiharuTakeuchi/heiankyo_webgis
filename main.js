@@ -95,9 +95,9 @@ const map = new maplibregl.Map({
   container: "map", // div要素のid
   zoom: 12, // 初期表示のズーム
   center: [135.73, 35], // 初期表示の中心
-  minZoom: 4, // 最小ズーム
+  minZoom: 8, // 最小ズーム
   maxZoom: 20, // 最大ズーム
-  maxBounds: [122, 20, 154, 50], // 表示可能な範囲
+  maxBounds: [134, 34, 137, 36], // 表示可能な範囲
   hash: true,
   style: {
     version: 8,
@@ -168,16 +168,19 @@ const map = new maplibregl.Map({
         id: "gsi-photo-layer",
         source: "gsiphoto",
         type: "raster",
+        layout: { visibility: "none" },
       },
       {
         id: "gsi-gazo1-layer",
         source: "gsigazo1",
         type: "raster",
+        layout: { visibility: "none" },
       },
       {
         id: "gsi-elevation-layer",
         source: "elevation",
         type: "raster",
+        layout: { visibility: "none" },
       },
       {
         id: "heianarea-layer",
@@ -187,15 +190,7 @@ const map = new maplibregl.Map({
           "fill-color": "red",
           "fill-opacity": 0.2,
         },
-      },
-      {
-        id: "heianareaoutline-layer",
-        source: "heianarea",
-        type: "line",
-        paint: {
-          "line-color": "red",
-          "line-width": 4,
-        },
+        layout: { visibility: "none" },
       },
       {
         id: "heianlabel-layer",
@@ -216,12 +211,39 @@ const map = new maplibregl.Map({
         id: "excavation-heat",
         source: "excavation",
         type: "heatmap",
-
+        paint: {
+          "heatmap-weight": 1,
+          "heatmap-opacity": 0.7,
+          "heatmap-intensity": 3,
+          "heatmap-radius": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            0, // zoom=0
+            0, // 0px
+            10, // zoom=10
+            10, // 30px
+            15, // zoom=15
+            30,
+          ],
+          "heatmap-color": [
+            "interpolate",
+            ["linear"],
+            ["heatmap-density"],
+            0,
+            "rgba(0,0,0,1)",
+            0.5,
+            "rgba(0, 255, 46, 0.8)",
+            1.0,
+            "rgba(255, 231, 0, 0.8)",
+          ],
+        },
         filter: [
           "all",
           [">=", ["get", "西暦年"], 1890],
           ["<=", ["get", "西暦年"], 2023],
         ],
+        layout: { visibility: "none" },
       },
       {
         id: "excavation",
@@ -248,6 +270,9 @@ const map = new maplibregl.Map({
           [">=", ["get", "西暦年"], 1890],
           ["<=", ["get", "西暦年"], 2023],
         ],
+        layout: {
+          visibility: "visible",
+        },
       },
       {
         id: "plan-layer",
@@ -299,7 +324,6 @@ map.on("load", () => {
     //メインのGISデータの表示非表示、overLayerにすることで複数のレイヤーのなかで複数選択して表示する機能
     overLayers: {
       "heianarea-layer": "平安京条坊",
-      excavation: "発掘調査地点",
       "excavation-heat": "発掘調査地点ヒートマップ",
       "plan-layer": "調査図面",
     },
