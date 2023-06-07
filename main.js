@@ -214,18 +214,18 @@ const map = new maplibregl.Map({
         paint: {
           "heatmap-weight": 1,
           "heatmap-opacity": 0.7,
-          "heatmap-intensity": 3,
-          "heatmap-radius": [
-            "interpolate",
-            ["linear"],
-            ["zoom"],
-            0, // zoom=0
-            0, // 0px
-            10, // zoom=10
-            10, // 30px
-            15, // zoom=15
-            30,
-          ],
+          //"heatmap-intensity": 3,
+          //"heatmap-radius": [
+          //"interpolate",
+          //["linear"],
+          //["zoom"],
+          //0, // zoom=0
+          //0, // 0px
+          //10, // zoom=10
+          //10, // 30px
+          //15, // zoom=15
+          //30,
+          //],
           "heatmap-color": [
             "interpolate",
             ["linear"],
@@ -233,7 +233,7 @@ const map = new maplibregl.Map({
             0,
             "rgba(0,0,0,1)",
             0.5,
-            "rgba(0, 255, 46, 0.8)",
+            "rgba(96, 244, 2, 0.81)",
             1.0,
             "rgba(255, 231, 0, 0.8)",
           ],
@@ -255,12 +255,12 @@ const map = new maplibregl.Map({
             ["==", ["get", "a調査機"], "企業"],
             "red",
             ["==", ["get", "a調査機"], "京都市埋蔵文化財研究所"],
-            "green",
+            "#030",
             ["==", ["get", "a調査機"], "古代学協会"],
             "blue",
             ["==", ["get", "a調査機"], "京都府埋蔵文化財調査研究センター"],
             "grey",
-            "yellow",
+            "#90c",
           ],
           "circle-stroke-color": "#fff",
           "circle-stroke-width": 1,
