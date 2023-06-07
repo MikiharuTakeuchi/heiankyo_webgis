@@ -8,6 +8,8 @@ import "nouislider/dist/nouislider.css";
 import OpacityControl from "maplibre-gl-opacity";
 import "maplibre-gl-opacity/dist/maplibre-gl-opacity.css";
 
+import "./style.css";
+
 //発掘年度スライダーを初期化,idで探しに行く
 const sliderDiv = document.getElementById("slider");
 const minYear = 1890;
@@ -96,8 +98,10 @@ const map = new maplibregl.Map({
   minZoom: 4, // 最小ズーム
   maxZoom: 20, // 最大ズーム
   maxBounds: [122, 20, 154, 50], // 表示可能な範囲
+  hash: true,
   style: {
     version: 8,
+    glyphs: "https://mierune.github.io/fonts/{fontstack}/{range}.pbf",
     sources: {
       // 背景地図ソース
       osm: {
@@ -115,30 +119,42 @@ const map = new maplibregl.Map({
         ],
         maxZoom: 18,
         tileSize: 256,
+        attribution:
+          ' <a href="https://maps.gsi.go.jp/development/ichiran.html">地理院地図</a>',
       },
       gsigazo1: {
         type: "raster",
         tiles: ["https://cyberjapandata.gsi.go.jp/xyz/gazo1/{z}/{x}/{y}.jpg"],
         maxzoom: 17,
         tileSize: 256,
+        attribution:
+          '<a href="https://maps.gsi.go.jp/development/ichiran.html">地理院地図</a>',
       },
       elevation: {
         type: "raster",
         tiles: ["https://cyberjapandata.gsi.go.jp/xyz/relief/{z}/{x}/{y}.png"],
         maxzoom: 15,
         tileSize: 256,
+        attribution:
+          '<a href="https://maps.gsi.go.jp/development/ichiran.html">地理院地図</a>',
       },
       excavation: {
         type: "geojson",
         data: "/excavationpoint.geojson",
+        attribution:
+          '<a href="https://heiankyoexcavationdb-rstgis.hub.arcgis.com/">平安京跡データベース</a>',
       },
       plan: {
         type: "geojson",
         data: "/cyukain_east_survey18.geojson",
+        attribution:
+          '<a href="https://heiankyoexcavationdb-rstgis.hub.arcgis.com/">平安京跡データベース</a>',
       },
       heianarea: {
         type: "geojson",
         data: "/heiankyo_area.geojson",
+        attribution:
+          '<a href="https://heiankyoexcavationdb-rstgis.hub.arcgis.com/">平安京跡データベース</a>',
       },
     },
     layers: [
@@ -166,7 +182,35 @@ const map = new maplibregl.Map({
       {
         id: "heianarea-layer",
         source: "heianarea",
+        type: "fill",
+        paint: {
+          "fill-color": "red",
+          "fill-opacity": 0.2,
+        },
+      },
+      {
+        id: "heianareaoutline-layer",
+        source: "heianarea",
         type: "line",
+        paint: {
+          "line-color": "red",
+          "line-width": 4,
+        },
+      },
+      {
+        id: "heianlabel-layer",
+        source: "heianarea",
+        type: "symbol",
+        minzoom: 16,
+        layout: {
+          "text-field": ["get", "Name"],
+          "text-font": ["mplus1c-regular"],
+        },
+        paint: {
+          "text-halo-width": 1,
+          "text-halo-color": "#fff",
+          "text-color": "#000",
+        },
       },
       {
         id: "excavation-heat",
