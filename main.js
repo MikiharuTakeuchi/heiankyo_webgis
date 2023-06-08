@@ -10,6 +10,10 @@ import "maplibre-gl-opacity/dist/maplibre-gl-opacity.css";
 
 import "./style.css";
 
+//legend
+import { MaplibreLegendControl } from "@watergis/maplibre-gl-legend";
+import "@watergis/maplibre-gl-legend/dist/maplibre-gl-legend.css";
+
 //発掘年度スライダーを初期化,idで探しに行く
 const sliderDiv = document.getElementById("slider");
 const minYear = 1890;
@@ -90,6 +94,24 @@ const ageSlider = noUiSlider.create(ageSliderDiv, {
   },
 });
 
+const expressionDict = {
+  "excavation-other": [
+    "all",
+    ["!=", ["get", "a調査機"], "企業"],
+    ["!=", ["get", "a調査機"], "京都市埋蔵文化財研究所"],
+    ["!=", ["get", "a調査機"], "古代学協会"],
+    ["!=", ["get", "a調査機"], "京都府埋蔵文化財調査研究センター"],
+  ],
+  "excavation-company": ["==", ["get", "a調査機"], "企業"],
+  "excavation-shimaibun": ["==", ["get", "a調査機"], "京都市埋蔵文化財研究所"],
+  "excavation-kodaigaku": ["==", ["get", "a調査機"], "古代学協会"],
+  "excavation-humaibun": [
+    "==",
+    ["get", "a調査機"],
+    "京都府埋蔵文化財調査研究センター",
+  ],
+};
+
 //地図画面を初期化
 const map = new maplibregl.Map({
   container: "map", // div要素のid
@@ -101,6 +123,7 @@ const map = new maplibregl.Map({
   hash: true,
   style: {
     version: 8,
+    sprite: "https://demotiles.maplibre.org/styles/osm-bright-gl-style/sprite", // スプライトは使わないけど、legendのエラーを回避するために定義
     glyphs: "https://mierune.github.io/fonts/{fontstack}/{range}.pbf",
     sources: {
       // 背景地図ソース
@@ -246,22 +269,11 @@ const map = new maplibregl.Map({
         layout: { visibility: "none" },
       },
       {
-        id: "excavation",
+        id: "excavation-other",
         source: "excavation",
         type: "circle",
         paint: {
-          "circle-color": [
-            "case",
-            ["==", ["get", "a調査機"], "企業"],
-            "red",
-            ["==", ["get", "a調査機"], "京都市埋蔵文化財研究所"],
-            "#030",
-            ["==", ["get", "a調査機"], "古代学協会"],
-            "blue",
-            ["==", ["get", "a調査機"], "京都府埋蔵文化財調査研究センター"],
-            "grey",
-            "#90c",
-          ],
+          "circle-color": "#90c",
           "circle-stroke-color": "#fff",
           "circle-stroke-width": 1,
         },
@@ -269,6 +281,83 @@ const map = new maplibregl.Map({
           "all",
           [">=", ["get", "西暦年"], 1890],
           ["<=", ["get", "西暦年"], 2023],
+          expressionDict["excavation-other"],
+        ],
+        layout: {
+          visibility: "visible",
+        },
+      },
+      {
+        id: "excavation-company",
+        source: "excavation",
+        type: "circle",
+        paint: {
+          "circle-color": "red",
+          "circle-stroke-color": "#fff",
+          "circle-stroke-width": 1,
+        },
+        filter: [
+          "all",
+          [">=", ["get", "西暦年"], 1890],
+          ["<=", ["get", "西暦年"], 2023],
+          expressionDict["excavation-company"],
+        ],
+        layout: {
+          visibility: "visible",
+        },
+      },
+      {
+        id: "excavation-shimaibun",
+        source: "excavation",
+        type: "circle",
+        paint: {
+          "circle-color": "#030",
+          "circle-stroke-color": "#fff",
+          "circle-stroke-width": 1,
+        },
+        filter: [
+          "all",
+          [">=", ["get", "西暦年"], 1890],
+          ["<=", ["get", "西暦年"], 2023],
+          expressionDict["excavation-shimaibun"],
+        ],
+        layout: {
+          visibility: "visible",
+        },
+      },
+      {
+        id: "excavation-kodaigaku",
+        source: "excavation",
+        type: "circle",
+        paint: {
+          "circle-color": "blue",
+          "circle-stroke-color": "#fff",
+          "circle-stroke-width": 1,
+        },
+        filter: [
+          "all",
+          [">=", ["get", "西暦年"], 1890],
+          ["<=", ["get", "西暦年"], 2023],
+          expressionDict["excavation-kodaigaku"],
+        ],
+        layout: {
+          visibility: "visible",
+        },
+      },
+      {
+        id: "excavation-humaibun",
+        source: "excavation",
+        type: "circle",
+        paint: {
+          "circle-color": "grey",
+          "circle-stroke-color": "#fff",
+          "circle-stroke-width": 1,
+        },
+        filter: [
+          "all",
+          [">=", ["get", "西暦年"], 1890],
+          ["<=", ["get", "西暦年"], 2023],
+          expressionDict["excavation-humaibun"],
         ],
         layout: {
           visibility: "visible",
@@ -307,7 +396,30 @@ function updateExcavationFilter() {
   ];
 
   //地図にfilterで定義した条件をポイントデータとヒートマップに反映
-  map.setFilter("excavation", filter);
+  map.setFilter("excavation-other", [
+    ...filter,
+    expressionDict["excavation-other"],
+  ]);
+
+  map.setFilter("excavation-company", [
+    ...filter,
+    expressionDict["excavation-company"],
+  ]);
+
+  map.setFilter("excavation-shimaibun", [
+    ...filter,
+    expressionDict["excavation-shimaibun"],
+  ]);
+
+  map.setFilter("excavation-kodaigaku", [
+    ...filter,
+    expressionDict["excavation-kodaigaku"],
+  ]);
+
+  map.setFilter("excavation-humaibun", [
+    ...filter,
+    expressionDict["excavation-humaibun"],
+  ]);
 
   map.setFilter("excavation-heat", filter);
 }
@@ -321,19 +433,38 @@ map.on("load", () => {
       "gsi-gazo1-layer": "地理院地図 1974年-1978年写真",
       "gsi-elevation-layer": "地理院地図 色別標高図",
     },
-    //メインのGISデータの表示非表示、overLayerにすることで複数のレイヤーのなかで複数選択して表示する機能
-    overLayers: {
-      "heianarea-layer": "平安京条坊",
-      "excavation-heat": "発掘調査地点ヒートマップ",
-      "plan-layer": "調査図面",
-    },
   });
   map.addControl(opacity, "top-left");
+
+  const targets = {
+    "excavation-other": "調査地点（その他）",
+    "excavation-company": "調査地点(企業)",
+    "excavation-shimaibun": "調査地点（京都市埋蔵文化財研究所）",
+    "excavation-kodaigaku": "調査地点（古代学協会）",
+    "excavation-humaibun": "調査地点（京都府埋蔵文化財調査研究センター）",
+    "excavation-heat": "発掘調査地点ヒートマップ",
+    "heianarea-layer": "平安京条坊",
+    "plan-layer": "調査図面",
+  };
+
+  map.addControl(
+    new MaplibreLegendControl(targets, {
+      showDefault: true,
+      onlyRendered: false,
+    }),
+    "top-left"
+  );
 
   map.on("click", (e) => {
     // クリックした位置にある地物を取得
     const features = map.queryRenderedFeatures(e.point, {
-      layers: ["excavation"],
+      layers: [
+        "excavation-other",
+        "excavation-company",
+        "excavation-shimaibun",
+        "excavation-kodaigaku",
+        "excavation-humaibun",
+      ],
     });
     if (features.length === 0) return;
     console.log(features);
@@ -387,7 +518,13 @@ map.on("load", () => {
   map.on("mousemove", (e) => {
     //マウスカーソル以下にレイヤーが存在するかどうかをチェック
     const features = map.queryRenderedFeatures(e.point, {
-      layers: ["excavation"],
+      layers: [
+        "excavation-other",
+        "excavation-company",
+        "excavation-shimaibun",
+        "excavation-kodaigaku",
+        "excavation-humaibun",
+      ],
     });
     //console.log(features)
     if (features.length > 0) {
