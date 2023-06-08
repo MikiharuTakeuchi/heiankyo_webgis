@@ -74,7 +74,7 @@ const ageSlider = noUiSlider.create(ageSliderDiv, {
   },
   step: 1,
   tooltips: true,
-  //メモリを追加
+  //目盛りを追加
   pips: {
     mode: "steps",
     format: {
@@ -98,7 +98,9 @@ const ageSlider = noUiSlider.create(ageSliderDiv, {
   },
 });
 
+//定義
 const expressionDict = {
+  //４つの値でなければ、その他（-other）に分類
   "excavation-other": [
     "all",
     ["!=", ["get", "a調査機"], "企業"],
@@ -106,6 +108,7 @@ const expressionDict = {
     ["!=", ["get", "a調査機"], "古代学協会"],
     ["!=", ["get", "a調査機"], "京都府埋蔵文化財調査研究センター"],
   ],
+  //それぞれの属性値で分類
   "excavation-company": ["==", ["get", "a調査機"], "企業"],
   "excavation-shimaibun": ["==", ["get", "a調査機"], "京都市埋蔵文化財研究所"],
   "excavation-kodaigaku": ["==", ["get", "a調査機"], "古代学協会"],
@@ -165,7 +168,7 @@ const map = new maplibregl.Map({
         attribution:
           '<a href="https://maps.gsi.go.jp/development/ichiran.html">地理院地図</a>',
       },
-      //excavaiton用の箱だけ用意する
+      //excavaiton用の箱だけ用意する、のちにテキスト検索をするため、geojsonのままではできない
       excavation: {
         type: "geojson",
         data: {
@@ -199,7 +202,7 @@ const map = new maplibregl.Map({
         id: "gsi-photo-layer",
         source: "gsiphoto",
         type: "raster",
-        layout: { visibility: "none" },
+        layout: { visibility: "none" }, //node:初期の画面で表示しない
       },
       {
         id: "gsi-gazo1-layer",
@@ -224,10 +227,11 @@ const map = new maplibregl.Map({
         layout: { visibility: "none" },
       },
       {
+        //平安条坊名を表示するためのもの
         id: "heianlabel-layer",
         source: "heianarea",
         type: "symbol",
-        minzoom: 16,
+        minzoom: 16, //そこまでアップしないと表示されない
         layout: {
           "text-field": ["get", "Name"],
           "text-font": ["mplus1c-regular"],
@@ -248,6 +252,7 @@ const map = new maplibregl.Map({
           //"heatmap-intensity": 3,
           //"heatmap-radius": [
           //"interpolate",
+          //以下のところで、zoomレベルに応じてヒートマップを作るときのpxを指定できる、ある程度の距離（例えば500ｍ範囲）などができたりする
           //["linear"],
           //["zoom"],
           //0, // zoom=0
@@ -262,7 +267,7 @@ const map = new maplibregl.Map({
             ["linear"],
             ["heatmap-density"],
             0,
-            "rgba(0,0,0,1)",
+            "rgba(0,0,0,1)", //値0でもちょっとした色を出力(0,0,0,0)でもいい。
             0.5,
             "rgba(96, 244, 2, 0.81)",
             1.0,
@@ -270,12 +275,13 @@ const map = new maplibregl.Map({
           ],
         },
         filter: [
-          "all",
+          "all", //and条件
           [">=", ["get", "西暦年"], 1890],
           ["<=", ["get", "西暦年"], 2023],
         ],
         layout: { visibility: "none" },
       },
+      //以下、legendで表示・非表示まで実装できるようにlegendで分類する分、excavationを分類して入れる。
       {
         id: "excavation-other",
         source: "excavation",
@@ -479,7 +485,6 @@ map.on("load", () => {
       ],
     });
     if (features.length === 0) return;
-    console.log(features);
 
     //ポップアップのところにスクロール機能をつける
     let popupHtml = `<div style="max-height:400px; overflow-y: scroll;">`;
@@ -489,7 +494,6 @@ map.on("load", () => {
     //ポップアップするときに事物が複数あるときの処理
     features.forEach((feature, idx) => {
       if (idx + 1 > MAX_ITEMS) return;
-      console.log(feature.properties["内容"]);
       //ポップアップのスタイル
       popupHtml += `<div style="margin:4px 0; padding:2px; background-color:#00000000;">`;
       // 各地物の情報をHTMLに追加する
@@ -538,7 +542,7 @@ map.on("load", () => {
         "excavation-humaibun",
       ],
     });
-    //console.log(features)
+
     if (features.length > 0) {
       //地物が存在する場合はカーソルをpointerに変更
       map.getCanvas().style.cursor = "pointer";
@@ -555,32 +559,37 @@ map.on("load", () => {
     updateExcavationFilter();
   });
 });
+
+//テキスト検索
 const options = {
   includeScore: true,
   //検索する属性を決める
   keys: [
     { name: "content", getFn: (feature) => feature.properties["内容"] },
     { name: "location", getFn: (feature) => feature.properties["場所"] },
-    { name: "location", getFn: (feature) => feature.properties["書名"] },
+    { name: "report", getFn: (feature) => feature.properties["書名"] },
   ],
 };
 
-const fuse = new Fuse(excavationGeojson.features, options);
+//Fuse.jsがテキスト検索に適している。
+const fuse = new Fuse(excavationGeojson.features, options); //(demo)const fuse = new Fuse(list, options); listのところは配列の検索対象。
 const wordsearch = document.getElementById("wordsearch");
 wordsearch.oninput = (e) => {
+  //テキスト検索に何も入力されていない（入力の値の大きさが0）のときは、すべてを表示する。
   if (e.target.value.length === 0) {
     map.getSource("excavation").setData(excavationGeojson);
     return;
   }
-  // e.target.value > 1, then
-  const result = fuse.search(e.target.value);
+  // e.target.value > 1, then　,テキスト検索に何か入力されている場合
+  const result = fuse.search(e.target.value); //検索を実行
   const geojson = {
     type: "FeatureCollection",
     features: [],
   };
   result.forEach((r) => {
-    geojson.features.push(r.item);
+    //結果の配列を加工、そのままではgeojsonにならないため。
+    geojson.features.push(r.item); //pushは配列の最後に要素を追加。
   });
-  //excavationというソースをみつける、excavationGeojsonを与える。
+  //excavationというソースをみつける、geojsonを与える。
   map.getSource("excavation").setData(geojson);
 };
