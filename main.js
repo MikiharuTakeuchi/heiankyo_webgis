@@ -14,6 +14,10 @@ import "./style.css";
 import { MaplibreLegendControl } from "@watergis/maplibre-gl-legend";
 import "@watergis/maplibre-gl-legend/dist/maplibre-gl-legend.css";
 
+//jsonデータをJavaScriptのデータとして読み込む、geojsonではうまくいかないのでjsonで処理
+import excavationGeojson from "./public/excavationpoint.json";
+import Fuse from "fuse.js";
+
 //発掘年度スライダーを初期化,idで探しに行く
 const sliderDiv = document.getElementById("slider");
 const minYear = 1890;
@@ -161,9 +165,13 @@ const map = new maplibregl.Map({
         attribution:
           '<a href="https://maps.gsi.go.jp/development/ichiran.html">地理院地図</a>',
       },
+      //excavaiton用の箱だけ用意する
       excavation: {
         type: "geojson",
-        data: "/excavationpoint.geojson",
+        data: {
+          type: "FeatureCollection",
+          features: [],
+        },
         attribution:
           '<a href="https://heiankyoexcavationdb-rstgis.hub.arcgis.com/">平安京跡データベース</a>',
       },
@@ -425,6 +433,9 @@ function updateExcavationFilter() {
 }
 
 map.on("load", () => {
+  //用意したexcavationの箱にjsonからもってきたデータを入れる。
+  map.getSource("excavation").setData(excavationGeojson);
+
   const opacity = new OpacityControl({
     //背景地図の切り替え機能、baseLayerにすることで複数のなかで一つを選択して表示する機能
     baseLayers: {
@@ -447,9 +458,10 @@ map.on("load", () => {
     "plan-layer": "調査図面",
   };
 
+  //legendを追加する
   map.addControl(
     new MaplibreLegendControl(targets, {
-      showDefault: true,
+      showDefault: false,
       onlyRendered: false,
     }),
     "top-left"
@@ -543,3 +555,32 @@ map.on("load", () => {
     updateExcavationFilter();
   });
 });
+const options = {
+  includeScore: true,
+  //検索する属性を決める
+  keys: [
+    { name: "content", getFn: (feature) => feature.properties["内容"] },
+    { name: "location", getFn: (feature) => feature.properties["場所"] },
+    { name: "location", getFn: (feature) => feature.properties["書名"] },
+  ],
+};
+
+const fuse = new Fuse(excavationGeojson.features, options);
+const wordsearch = document.getElementById("wordsearch");
+wordsearch.oninput = (e) => {
+  if (e.target.value.length === 0) {
+    map.getSource("excavation").setData(excavationGeojson);
+    return;
+  }
+  // e.target.value > 1, then
+  const result = fuse.search(e.target.value);
+  const geojson = {
+    type: "FeatureCollection",
+    features: [],
+  };
+  result.forEach((r) => {
+    geojson.features.push(r.item);
+  });
+  //excavationというソースをみつける、excavationGeojsonを与える。
+  map.getSource("excavation").setData(geojson);
+};
