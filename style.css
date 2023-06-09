@@ -1,4 +1,18 @@
 .card {
   background-color: white;
-  border-radius:10px;
+  border-radius: 10px;
+}
+
+#wordsearch {
+  position: absolute;
+  top: 7px;
+  left: 90px;
+}
+
+@media screen and (max-width: 550px) {
+  #wordsearch {
+    position: absolute;
+    top: 30px;
+    right: 5px;
+  }
 }
