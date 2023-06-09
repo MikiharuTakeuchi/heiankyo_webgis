@@ -3,16 +3,16 @@
   border-radius: 10px;
 }
 
-#wordsearch {
+#wordsearch-container {
   position: absolute;
-  top: 7px;
-  left: 90px;
+  top: 14px;
+  left: 190px;
 }
 
 @media screen and (max-width: 550px) {
-  #wordsearch {
+  #wordsearch-container {
     position: absolute;
-    top: 30px;
-    right: 5px;
+    top: 60px;
+    right: 16px;
   }
 }
