@@ -439,8 +439,19 @@ function updateExcavationFilter() {
 }
 
 map.on("load", () => {
-  //用意したexcavationの箱にjsonからもってきたデータを入れる。
-  map.getSource("excavation").setData(excavationGeojson);
+  const url = new URL(window.location);
+  if (url.searchParams.has('wordsearch')) {
+    // クエリパラメータが存在する場合、絞り込みを実行
+    const word = url.searchParams.get('wordsearch');
+    filterGeojsonBy(word);
+
+    // テキスト入力欄に検索文字列を設定
+    document.getElementById('wordsearch').value = word;
+  } else {
+    // クエリパラメータが存在しない場合、全件表示
+    //用意したexcavationの箱にjsonからもってきたデータを入れる。
+    map.getSource('excavation').setData(excavationGeojson);
+  }
 
   const opacity = new OpacityControl({
     //背景地図の切り替え機能、baseLayerにすることで複数のなかで一つを選択して表示する機能
@@ -574,22 +585,38 @@ const options = {
 //Fuse.jsがテキスト検索に適している。
 const fuse = new Fuse(excavationGeojson.features, options); //(demo)const fuse = new Fuse(list, options); listのところは配列の検索対象。
 const wordsearch = document.getElementById("wordsearch");
+const filterGeojsonBy = (text) => {
+  const result = fuse.search(text); //検索を実行
+  const geojson = {
+      type: 'FeatureCollection',
+      features: [],
+  };
+  result.forEach((r) => {
+      //結果の配列を加工、そのままではgeojsonにならないため。
+      geojson.features.push(r.item); //pushは配列の最後に要素を追加。
+  });
+  //excavationというソースをみつける、geojsonを与える。
+  map.getSource('excavation').setData(geojson);
+};
 wordsearch.oninput = (e) => {
   //テキスト検索に何も入力されていない（入力の値の大きさが0）のときは、すべてを表示する。
   if (e.target.value.length === 0) {
-    map.getSource("excavation").setData(excavationGeojson);
-    return;
+    // URLのクエリパラメータからwordsearchを削除
+    const url = new URL(window.location);
+    url.searchParams.delete('wordsearch');
+    history.pushState({}, '', url);
+
+    map.getSource('excavation').setData(excavationGeojson);
+    return; // 処理を終了する
   }
+
   // e.target.value > 1, then　,テキスト検索に何か入力されている場合
-  const result = fuse.search(e.target.value); //検索を実行
-  const geojson = {
-    type: "FeatureCollection",
-    features: [],
-  };
-  result.forEach((r) => {
-    //結果の配列を加工、そのままではgeojsonにならないため。
-    geojson.features.push(r.item); //pushは配列の最後に要素を追加。
-  });
-  //excavationというソースをみつける、geojsonを与える。
-  map.getSource("excavation").setData(geojson);
+
+  // URLのクエリパラメータにwordsearchを追加
+  const url = new URL(window.location);
+  url.searchParams.set('wordsearch', e.target.value);
+  history.pushState({}, '', url);
+
+  // GeoJSONのフィルター実行
+  filterGeojsonBy(e.target.value);
 };
